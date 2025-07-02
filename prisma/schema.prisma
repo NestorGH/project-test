@@ -20,7 +20,7 @@ datasource db {
 model Employee {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String  @unique
+  email     String   @unique
   role      Role
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -31,4 +31,25 @@ enum Role {
   JUNIOR
   ENGINEER
   ADMIN
+}
+
+model Owner {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  pets      Pet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  age       Int
+  species   String
+  breed     String
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+  ownerId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
