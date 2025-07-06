@@ -32,7 +32,7 @@ export class OwnerController {
   @Patch(':id')
   @ApiBody({ type: UpdateOwnerDto })
   @ApiOkResponse({ type: OwnerEntity })
-  update(@Param('id') id: string, @Body() updateOwnerDto: Prisma.OwnerUpdateInput & { pets?: { id: number, data: any }[] }) {
+  update(@Param('id') id: string, @Body() updateOwnerDto: UpdateOwnerDto) {
     return this.ownerService.update(+id, updateOwnerDto);
   }
 

@@ -38,23 +38,23 @@ export class OwnerService {
     });
   }
 
-  async update(id: number, updateOwnerDto: Prisma.OwnerUpdateInput & { pets?: { id: number, data: any }[] }) {
-    const { pets, ...ownerData } = updateOwnerDto as any;
-
+  async update(id: number, updateOwnerDto: UpdateOwnerDto) {
     return this.databaseService.owner.update({
       where: { id },
       data: {
-        ...ownerData,
-        ...(pets && pets.length
-          ? {
-            pets: {
-              update: pets.map(pet => ({
-                where: { id: pet.id },
-                data: pet.data,
-              })),
-            },
-          }
-          : {}),
+        name: updateOwnerDto.name,
+        email: updateOwnerDto.email,
+        pets: {
+          update: updateOwnerDto.pets?.map(pet => ({
+            where: { id: pet.id },
+            data: {
+              name: pet.name,
+              age: pet.age,
+              species: pet.species,
+              breed: pet.breed
+            }
+          })) || [],
+        }
       },
     });
   }
