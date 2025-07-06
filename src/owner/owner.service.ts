@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from 'generated/prisma';
+import { CreateOwnerDto } from './dto/create-owner.dto';
+import { UpdateOwnerDto } from './dto/update-owner.dto';
 
 @Injectable()
 export class OwnerService {
   constructor(private readonly databaseService: DatabaseService) { }
 
-  async create(createOwnerDto: Prisma.OwnerCreateInput) {
-    // Destructure pets from the DTO, rest goes to owner
-    const { pets, ...ownerData } = createOwnerDto as any;
-
+  async create(createOwnerDto: CreateOwnerDto) {
     return this.databaseService.owner.create({
       data: {
-        ...ownerData,
-        pets:
-        {
-          create: pets
+        name: createOwnerDto.name,
+        email: createOwnerDto.email,
+        pets: {
+          create: createOwnerDto.pets.map(pet => ({
+            name: pet.name,
+            age: pet.age,
+            species: pet.species,
+            breed: pet.breed
+          }))
         }
       },
     });
@@ -35,14 +39,14 @@ export class OwnerService {
   }
 
   async update(id: number, updateOwnerDto: Prisma.OwnerUpdateInput & { pets?: { id: number, data: any }[] }) {
-  const { pets, ...ownerData } = updateOwnerDto as any;
+    const { pets, ...ownerData } = updateOwnerDto as any;
 
-  return this.databaseService.owner.update({
-    where: { id },
-    data: {
-      ...ownerData,
-      ...(pets && pets.length
-        ? {
+    return this.databaseService.owner.update({
+      where: { id },
+      data: {
+        ...ownerData,
+        ...(pets && pets.length
+          ? {
             pets: {
               update: pets.map(pet => ({
                 where: { id: pet.id },
@@ -50,10 +54,10 @@ export class OwnerService {
               })),
             },
           }
-        : {}),
-    },
-  });
-}
+          : {}),
+      },
+    });
+  }
 
   async remove(id: number) { // Remove all pets associated (without Cascade delete)
     await this.databaseService.pet.deleteMany({

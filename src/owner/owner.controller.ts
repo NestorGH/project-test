@@ -13,7 +13,7 @@ export class OwnerController {
   @Post()
   @ApiBody({ type: CreateOwnerDto })
   @ApiCreatedResponse({ type: OwnerEntity })
-  create(@Body() createOwnerDto: Prisma.OwnerCreateInput) {
+  create(@Body() createOwnerDto: CreateOwnerDto) {
     return this.ownerService.create(createOwnerDto);
   }
 
@@ -30,14 +30,14 @@ export class OwnerController {
   }
 
   @Patch(':id')
-  @ApiBody({ type: UpdateOwnerDto})
+  @ApiBody({ type: UpdateOwnerDto })
   @ApiOkResponse({ type: OwnerEntity })
   update(@Param('id') id: string, @Body() updateOwnerDto: Prisma.OwnerUpdateInput & { pets?: { id: number, data: any }[] }) {
     return this.ownerService.update(+id, updateOwnerDto);
   }
 
   @Delete(':id')
-  @ApiOkResponse({ type: OwnerEntity})
+  @ApiOkResponse({ type: OwnerEntity })
   remove(@Param('id') id: string) {
     return this.ownerService.remove(+id);
   }
