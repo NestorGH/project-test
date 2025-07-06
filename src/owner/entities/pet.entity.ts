@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { PetEntity } from "./pet.entity";
 
-export class OwnerEntity {
+export class PetEntity {
     @ApiProperty()
     id: number;
     
@@ -9,10 +8,16 @@ export class OwnerEntity {
     name: string;
 
     @ApiProperty()
-    email: string;
+    age: number;
 
-    @ApiProperty({ type: [PetEntity] })
-    pets: PetEntity[];
+    @ApiProperty()
+    species: string;
+
+    @ApiProperty()
+    breed: string;
+
+    @ApiProperty()
+    ownerId: number;
 
     @ApiProperty()
     createdAt: Date;
