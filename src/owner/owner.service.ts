@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from 'generated/prisma';
 import { CreateOwnerDto } from './dto/create-owner.dto';
@@ -32,39 +32,64 @@ export class OwnerService {
   }
 
   async findOne(id: number) {
-    return this.databaseService.owner.findUnique({
+    const owner = await this.databaseService.owner.findUnique({
       where: { id },
       include: { pets: true }
     });
+    if (!owner) {
+      throw new NotFoundException('The record with the specified ID does not exist or has been deleted.');
+    }
+    return owner;
   }
 
   async update(id: number, updateOwnerDto: UpdateOwnerDto) {
-    return this.databaseService.owner.update({
-      where: { id },
-      data: {
-        name: updateOwnerDto.name,
-        email: updateOwnerDto.email,
-        pets: {
-          update: updateOwnerDto.pets?.map(pet => ({
-            where: { id: pet.id },
-            data: {
-              name: pet.name,
-              age: pet.age,
-              species: pet.species,
-              breed: pet.breed
-            }
-          })) || [],
-        }
-      },
-    });
+    try {
+      return await this.databaseService.owner.update({
+        where: { id },
+        data: {
+          name: updateOwnerDto.name,
+          email: updateOwnerDto.email,
+          pets: {
+            update: updateOwnerDto.pets?.map(pet => ({
+              where: { id: pet.id },
+              data: {
+                name: pet.name,
+                age: pet.age,
+                species: pet.species,
+                breed: pet.breed
+              }
+            })) || [],
+          }
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('The record with the specified ID does not exist or has been deleted.');
+      }
+      throw error;
+    }
   }
 
-  async remove(id: number) { // Remove all pets associated (without Cascade delete)
+  async remove(id: number) {
+    const owner = await this.databaseService.owner.findUnique({
+      where: { id },
+      include: { pets: true }
+    });
+
+    if (!owner) {
+      throw new NotFoundException('The record with the specified ID does not exist or has been deleted.');
+    }
+
     await this.databaseService.pet.deleteMany({
       where: { ownerId: id },
     });
-    return this.databaseService.owner.delete({
+    await this.databaseService.owner.delete({
       where: { id },
     });
+
+    return owner; // Return the deleted owner with pets
   }
 }
