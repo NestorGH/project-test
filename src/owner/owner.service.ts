@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from 'generated/prisma';
 import { CreateOwnerDto } from './dto/create-owner.dto';
@@ -9,24 +9,33 @@ export class OwnerService {
   constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createOwnerDto: CreateOwnerDto) {
-    return this.databaseService.owner.create({
-      data: {
-        name: createOwnerDto.name,
-        email: createOwnerDto.email,
-        pets: {
-          create: createOwnerDto.pets.map(pet => ({
-            name: pet.name,
-            age: pet.age,
-            species: pet.species,
-            breed: pet.breed
-          }))
+    try {
+      return await this.databaseService.owner.create({
+        data: {
+          name: createOwnerDto.name,
+          email: createOwnerDto.email,
+          pets: {
+            create: createOwnerDto.pets.map(pet => ({
+              name: pet.name,
+              age: pet.age,
+              species: pet.species,
+              breed: pet.breed
+            })) || [],
+          }
+        },
+      })
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('The character already exists')
         }
-      },
-    });
+      }
+      throw error
+    }
   }
 
   async findAll() {
-    return this.databaseService.owner.findMany({
+    return await this.databaseService.owner.findMany({
       include: { pets: true }
     });
   }
