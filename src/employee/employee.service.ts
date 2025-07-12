@@ -8,13 +8,13 @@ export class EmployeeService {
   constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createEmployeeDto: Prisma.EmployeeCreateInput) {
-    return this.databaseService.employee.create({ //no need for await here, is already handled by DatabaseService
+    return await this.databaseService.employee.create({
       data: createEmployeeDto
     })
   }
 
   async findAll(role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
-    if (role) return this.databaseService.employee.findMany({
+    if (role) return await this.databaseService.employee.findMany({
       where: {
         role
       }
@@ -23,20 +23,20 @@ export class EmployeeService {
   }
 
   async findOne(id: number) {
-    return this.databaseService.employee.findUnique({
+    return await this.databaseService.employee.findUnique({
       where: { id }
     });
   }
 
   async update(id: number, updateEmployeeDto: Prisma.EmployeeUpdateInput) {
-    return this.databaseService.employee.update({
+    return await this.databaseService.employee.update({
       where: { id },
       data: updateEmployeeDto
     });
   }
 
   async remove(id: number) {
-    return this.databaseService.employee.delete({
+    return await this.databaseService.employee.delete({
       where: { id }
     })
   }

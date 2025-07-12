@@ -27,7 +27,7 @@ export class OwnerService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new BadRequestException('The character already exists')
+          throw new BadRequestException('The email already exists')
         }
       }
       throw error
