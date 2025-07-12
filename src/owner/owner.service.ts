@@ -55,6 +55,7 @@ export class OwnerService {
     try {
       return await this.databaseService.owner.update({
         where: { id },
+        include: { pets: true },
         data: {
           name: updateOwnerDto.name,
           email: updateOwnerDto.email,
