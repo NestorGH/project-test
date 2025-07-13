@@ -9,6 +9,7 @@ import { UserEntity } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+  //@UseGuards(AuthGuard)
   @Post()
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({ type: UserEntity })
