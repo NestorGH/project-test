@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { $Enums, Prisma } from 'generated/prisma';
+import { Prisma } from 'generated/prisma';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,16 @@ export class UserService {
         throw new BadRequestException('Something went wrong while creating the user');
       }
     }
+  }
+
+  async findOneName(name: string): Promise<UserEntity> {
+    const user = await this.databaseService.user.findFirst({
+      where: { name }
+    });
+    if (!user) {
+      throw new NotFoundException('User with the specified name does not exist.');
+    }
+    return user as UserEntity;
   }
 
   async findAll() {
