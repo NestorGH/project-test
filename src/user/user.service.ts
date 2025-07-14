@@ -4,17 +4,22 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from 'generated/prisma';
 import { UserEntity } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createUserDto: CreateUserDto) {
+
+    const saltOrRounds = 12;
+    const hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
+
     try {
       return await this.databaseService.user.create({
         data: {
           name: createUserDto.name,
-          password: createUserDto.password,
+          password: hash,
           role: createUserDto.role
         },
       });
@@ -32,7 +37,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User with the specified name does not exist.');
     }
-    return user as UserEntity;
+    return user;
   }
 
   async findAll() {
